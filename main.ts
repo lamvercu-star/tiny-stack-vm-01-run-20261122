@@ -116,9 +116,12 @@ function run(p: Uint8Array, inp: Uint8Array): { out: Uint8Array; code: number } 
         else if (op === 0x11) r = (a - b) | 0;
         else if (op === 0x12) r = Math.imul(a, b);
         else if (op === 0x13) {
+          // Signed DIV edge case: INT_MIN / -1 would overflow 32 bits, so it
+          // yields INT_MIN instead of trapping (only division by zero traps).
           if (b === 0) return done(4);
           r = a === -2147483648 && b === -1 ? a : (a / b) | 0;
         } else if (op === 0x14) {
+          // Signed MOD edge case: any x % -1 is 0, for the same reason.
           if (b === 0) return done(4);
           r = b === -1 ? 0 : (a % b) | 0;
         } else if (op === 0x15) {
